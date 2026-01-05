@@ -21,11 +21,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
-        /* Ajustes para parecer um App Nativo */
         body { -webkit-tap-highlight-color: transparent; background-color: #f3f4f6; }
         .card-group { transition: all 0.2s; }
         input, select, button { outline: none; }
-        /* Animação suave para as abas */
         .tab-content { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -57,13 +55,13 @@
         
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
-        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v2';
-        const APP_VERSION = "v2.1"; // Versão atualizada
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v3'; // Atualizado para v3
+        const APP_VERSION = "v3.0 (Turnos)";
 
         const { useState, useEffect } = React;
 
         // ==========================================
-        // ÍCONES SVG NATIVOS (Zero erro de renderização)
+        // ÍCONES SVG NATIVOS
         // ==========================================
         const Icons = {
             Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
@@ -80,7 +78,11 @@
             EyeOff: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
             Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
             Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
-            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+            Help: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>,
+            Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+            Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+            Sunset: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="16 5 12 9 8 5"/></svg>
         };
 
         // ==========================================
@@ -96,7 +98,7 @@
                     const unsubscribe = auth.onAuthStateChanged((u) => {
                         setUser(u);
                         if (u) {
-                            if (view === 'login') setView('menu');
+                            if (view === 'login' || view === 'help_setup') setView('menu');
                         } else {
                             setView('login');
                         }
@@ -131,29 +133,62 @@
                     )}
 
                     <main className="max-w-md mx-auto p-4">
-                        {!user ? <LoginScreen /> : (
+                        {!user ? (
+                            view === 'help_setup' ? <HelpSetup setView={setView} /> : <LoginScreen setView={setView} />
+                        ) : (
                             <>
                                 {view === 'menu' && <Menu setView={setView} />}
                                 {view === 'reception' && <Reception user={user} />}
                                 {view === 'new_convert' && <NewConvert user={user} />}
                                 {view === 'leader' && <Leader user={user} />}
+                                {view === 'help_setup' && <HelpSetup setView={setView} loggedIn={true} />}
                             </>
                         )}
                     </main>
 
-                    {/* Versão no Rodapé */}
-                    <div className="text-center py-4 text-xs text-gray-400">
-                        Versão: {APP_VERSION}
+                    <div className="text-center py-4 text-xs text-gray-400">Versão: {APP_VERSION}</div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // HELP SETUP
+        // ==========================================
+        function HelpSetup({ setView, loggedIn }) {
+            return (
+                <div className="pb-20">
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-orange-200">
+                        <div className="flex items-center gap-2 mb-4 text-orange-600">
+                            <Icons.Help />
+                            <h2 className="text-xl font-bold">Corrigir Erro de Envio</h2>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">Se você está vendo erros ao tentar enviar, é necessário liberar o acesso no Firebase:</p>
+                        <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2 mb-6">
+                            <li>Acesse <b>console.firebase.google.com</b></li>
+                            <li>Vá em <b>Firestore Database</b> &gt; Aba <b>Regras</b></li>
+                            <li>Cole o código abaixo:</li>
+                        </ol>
+                        <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono mb-6 overflow-x-auto">
+                            rules_version = '2';<br/>
+                            service cloud.firestore {'{'}<br/>
+                            &nbsp;&nbsp;match /databases/{'{'}database{'}'}/documents {'{'}<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;match /{'{'}document=**{'}'} {'{'}<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if request.auth != null;<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{'}'}<br/>
+                            &nbsp;&nbsp;{'}'}<br/>
+                            {'}'}
+                        </div>
+                        <button onClick={() => setView(loggedIn ? 'menu' : 'login')} className="w-full bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">Voltar</button>
                     </div>
                 </div>
             );
         }
 
         // ==========================================
-        // TELA DE LOGIN / CADASTRO
+        // LOGIN
         // ==========================================
-        function LoginScreen() {
-            const [isRegistering, setIsRegistering] = useState(false); // Alterna entre Login e Cadastro
+        function LoginScreen({ setView }) {
+            const [isRegistering, setIsRegistering] = useState(false); 
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('ADSolanea460'); 
             const [showPassword, setShowPassword] = useState(false);
@@ -163,34 +198,23 @@
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                setError('');
-                setSuccessMsg('');
-                setLoading(true);
+                setError(''); setSuccessMsg(''); setLoading(true);
 
-                if (!auth) { 
-                    setError('Firebase não configurado.'); 
-                    setLoading(false); 
-                    return; 
-                }
+                if (!auth) { setError('Firebase não configurado.'); setLoading(false); return; }
 
                 try {
                     if (isRegistering) {
-                        // Cadastro
                         await auth.createUserWithEmailAndPassword(email, password);
-                        setSuccessMsg('Conta criada com sucesso! Entrando...');
-                        // O onAuthStateChanged vai redirecionar automaticamente
+                        setSuccessMsg('Conta criada! Entrando...');
                     } else {
-                        // Login
                         await auth.signInWithEmailAndPassword(email, password);
                     }
                 } catch (err) {
-                    console.error(err);
                     let msg = 'Erro ao processar.';
                     if (err.code === 'auth/wrong-password') msg = 'Senha incorreta.';
                     if (err.code === 'auth/user-not-found') msg = 'Usuário não encontrado.';
                     if (err.code === 'auth/email-already-in-use') msg = 'E-mail já está em uso.';
-                    if (err.code === 'auth/weak-password') msg = 'A senha deve ter pelo menos 6 caracteres.';
-                    if (err.code === 'auth/invalid-email') msg = 'E-mail inválido.';
+                    if (err.code === 'auth/weak-password') msg = 'Senha fraca (min 6 caracteres).';
                     setError(msg);
                     setLoading(false);
                 }
@@ -199,68 +223,28 @@
             return (
                 <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
                     <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm border border-gray-100">
-                        <div className="flex justify-center mb-6 text-blue-600">
-                            <div className="bg-blue-100 p-4 rounded-full"><Icons.Lock /></div>
-                        </div>
-                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-                            {isRegistering ? 'Criar Conta' : 'Acesso Restrito'}
-                        </h2>
-                        <p className="text-center text-gray-400 text-sm mb-6">
-                            {isRegistering ? 'Preencha os dados para se registrar' : 'Entre com seu e-mail e senha'}
-                        </p>
-                        
+                        <div className="flex justify-center mb-6 text-blue-600"><div className="bg-blue-100 p-4 rounded-full"><Icons.Lock /></div></div>
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">{isRegistering ? 'Criar Conta' : 'Acesso Restrito'}</h2>
+                        <p className="text-center text-gray-400 text-sm mb-6">{isRegistering ? 'Preencha os dados' : 'Entre com e-mail e senha'}</p>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-600 ml-1">E-mail</label>
-                                <input 
-                                    type="email" 
-                                    required 
-                                    placeholder="seu@email.com" 
-                                    className="w-full p-3 bg-gray-50 border rounded-lg mt-1 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)} 
-                                />
+                                <input type="email" required placeholder="seu@email.com" className="w-full p-3 bg-gray-50 border rounded-lg mt-1" value={email} onChange={(e) => setEmail(e.target.value)} />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-600 ml-1">Senha</label>
                                 <div className="relative mt-1">
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
-                                        required 
-                                        placeholder="Sua senha" 
-                                        className="w-full p-3 bg-gray-50 border rounded-lg pr-12 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
-                                        value={password} 
-                                        onChange={(e) => setPassword(e.target.value)} 
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowPassword(!showPassword)} 
-                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600 rounded-full z-10 flex items-center justify-center h-10 w-10"
-                                    >
-                                        {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                                    </button>
+                                    <input type={showPassword ? "text" : "password"} required placeholder="Sua senha" className="w-full p-3 bg-gray-50 border rounded-lg pr-12" value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600 rounded-full z-10 flex items-center justify-center h-10 w-10">{showPassword ? <Icons.EyeOff /> : <Icons.Eye />}</button>
                                 </div>
                             </div>
-                            
-                            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-100">{error}</p>}
-                            {successMsg && <p className="text-green-600 text-sm text-center bg-green-50 p-2 rounded border border-green-100">{successMsg}</p>}
-                            
-                            <button 
-                                type="submit" 
-                                disabled={loading} 
-                                className={`mt-2 w-full text-white font-bold py-3 rounded-lg shadow-md disabled:opacity-50 transition-colors ${isRegistering ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800' : 'bg-blue-700 hover:bg-blue-800 active:bg-blue-900'}`}
-                            >
-                                {loading ? 'Processando...' : (isRegistering ? 'CADASTRAR' : 'ENTRAR')}
-                            </button>
+                            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
+                            {successMsg && <p className="text-green-600 text-sm text-center bg-green-50 p-2 rounded">{successMsg}</p>}
+                            <button type="submit" disabled={loading} className={`mt-2 w-full text-white font-bold py-3 rounded-lg shadow-md disabled:opacity-50 ${isRegistering ? 'bg-purple-600' : 'bg-blue-700'}`}>{loading ? 'Processando...' : (isRegistering ? 'CADASTRAR' : 'ENTRAR')}</button>
                         </form>
-
-                        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-                            <button 
-                                onClick={() => { setIsRegistering(!isRegistering); setError(''); setSuccessMsg(''); }}
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                                {isRegistering ? 'Já tem conta? Entre aqui' : 'Não tem conta? Cadastre-se'}
-                            </button>
+                        <div className="mt-6 pt-4 border-t border-gray-100 text-center space-y-3">
+                            <button onClick={() => { setIsRegistering(!isRegistering); setError(''); }} className="text-sm text-blue-600 hover:text-blue-800 font-medium block w-full">{isRegistering ? 'Já tem conta? Entre aqui' : 'Não tem conta? Cadastre-se'}</button>
+                            <button onClick={() => setView('help_setup')} className="text-xs text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 w-full mt-2"><span className="inline-block w-3"><Icons.Help /></span> Problemas no envio?</button>
                         </div>
                     </div>
                 </div>
@@ -268,46 +252,56 @@
         }
 
         // ==========================================
-        // MENU PRINCIPAL
+        // MENU
         // ==========================================
         function Menu({ setView }) {
             return (
                 <div className="flex flex-col gap-4 mt-6">
-                    <button onClick={() => setView('reception')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-blue-500 active:bg-gray-50 transition-transform active:scale-95">
+                    <button onClick={() => setView('reception')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-blue-500 active:bg-gray-50 active:scale-95 transition-transform">
                         <div className="bg-blue-100 p-3 rounded-full text-blue-700"><Icons.User /></div>
-                        <div className="text-left">
-                            <span className="block text-lg font-bold text-gray-800">Recepção (Visitantes)</span>
-                            <span className="text-sm text-gray-500">Cadastrar visitantes do culto</span>
-                        </div>
+                        <div className="text-left"><span className="block text-lg font-bold text-gray-800">Recepção</span><span className="text-sm text-gray-500">Cadastrar visitantes</span></div>
                     </button>
-
-                    <button onClick={() => setView('new_convert')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-purple-500 active:bg-gray-50 transition-transform active:scale-95">
+                    <button onClick={() => setView('new_convert')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-purple-500 active:bg-gray-50 active:scale-95 transition-transform">
                         <div className="bg-purple-100 p-3 rounded-full text-purple-700"><Icons.Heart /></div>
-                        <div className="text-left">
-                            <span className="block text-lg font-bold text-gray-800">Novos Convertidos</span>
-                            <span className="text-sm text-gray-500">Cadastrar decisões de hoje</span>
-                        </div>
+                        <div className="text-left"><span className="block text-lg font-bold text-gray-800">Novos Convertidos</span><span className="text-sm text-gray-500">Cadastrar decisões</span></div>
                     </button>
-
-                    <button onClick={() => setView('leader')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-green-500 active:bg-gray-50 transition-transform active:scale-95">
+                    <button onClick={() => setView('leader')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-green-500 active:bg-gray-50 active:scale-95 transition-transform">
                         <div className="bg-green-100 p-3 rounded-full text-green-700"><Icons.Download /></div>
-                        <div className="text-left">
-                            <span className="block text-lg font-bold text-gray-800">Área do Dirigente</span>
-                            <span className="text-sm text-gray-500">Ver todas as listas</span>
-                        </div>
+                        <div className="text-left"><span className="block text-lg font-bold text-gray-800">Área do Dirigente</span><span className="text-sm text-gray-500">Ver listas</span></div>
+                    </button>
+                    <button onClick={() => setView('help_setup')} className="mt-4 text-sm text-gray-500 flex items-center justify-center gap-2 py-2"><span className="w-4 h-4"><Icons.Help /></span> Ajuda / Configuração</button>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // AUX: SHIFT SELECTOR
+        // ==========================================
+        function ShiftSelector({ shift, setShift }) {
+            return (
+                <div className="grid grid-cols-3 gap-2 mb-4 p-1 bg-gray-100 rounded-lg">
+                    <button type="button" onClick={() => setShift('manha')} className={`py-2 text-xs font-bold rounded-md flex flex-col items-center gap-1 ${shift === 'manha' ? 'bg-white text-yellow-600 shadow' : 'text-gray-400'}`}>
+                        <Icons.Sun /> Manhã
+                    </button>
+                    <button type="button" onClick={() => setShift('tarde')} className={`py-2 text-xs font-bold rounded-md flex flex-col items-center gap-1 ${shift === 'tarde' ? 'bg-white text-orange-600 shadow' : 'text-gray-400'}`}>
+                        <Icons.Sunset /> Tarde
+                    </button>
+                    <button type="button" onClick={() => setShift('noite')} className={`py-2 text-xs font-bold rounded-md flex flex-col items-center gap-1 ${shift === 'noite' ? 'bg-white text-blue-800 shadow' : 'text-gray-400'}`}>
+                        <Icons.Moon /> Noite
                     </button>
                 </div>
             );
         }
 
         // ==========================================
-        // TELA: RECEPÇÃO (VISITANTES)
+        // RECEPÇÃO
         // ==========================================
         function Reception({ user }) {
             const [visitors, setVisitors] = useState([]);
             const [currentGroup, setCurrentGroup] = useState(1);
             const [formData, setFormData] = useState({ name: '', church: '', city: '', type: 'evangelical', relationship: '' });
             const [status, setStatus] = useState('');
+            const [shift, setShift] = useState('noite');
 
             const handleAdd = (e) => {
                 e.preventDefault();
@@ -319,26 +313,41 @@
             const sendList = async () => {
                 if (!user || !db || visitors.length === 0) return;
                 setStatus('sending');
+                const today = new Date().toISOString().split('T')[0];
+                const docId = `${today}_${shift}`; // Separar por Data e Turno
+
                 try {
-                    await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('visitor_lists').doc('live_list').set({
-                        visitors: visitors, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), senderId: user.uid
-                    });
+                    const docRef = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('daily_lists').doc(docId);
+                    
+                    // Usar arrayUnion para JUNTAR dados se o documento já existir
+                    await docRef.set({
+                        date: today,
+                        shift: shift,
+                        visitors: firebase.firestore.FieldValue.arrayUnion(...visitors),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
                     setStatus('success');
-                    setTimeout(() => setStatus(''), 3000);
+                    setTimeout(() => {
+                        setStatus('');
+                        setVisitors([]); // Limpa a lista local após enviar com sucesso
+                        setCurrentGroup(1);
+                    }, 2000);
                 } catch (error) { 
-                    console.error("Erro no envio:", error);
                     setStatus('error'); 
-                    // MOSTRA O ERRO REAL PARA O USUÁRIO
-                    alert("Erro ao enviar: " + error.message + "\n\nVerifique se as Regras do Firestore estão em 'Modo Teste' ou permitem gravação."); 
+                    alert("Erro ao enviar! " + error.message); 
                 }
             };
 
-            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
+            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado e Juntado!</h2><p className="text-sm text-gray-500">Lista limpa para novos nomes.</p></div>;
 
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4">
                         <div className="flex justify-between items-center mb-4"><h2 className="font-bold text-gray-700">Visitantes</h2><span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Grupo #{currentGroup}</span></div>
+                        
+                        <ShiftSelector shift={shift} setShift={setShift} />
+
                         <form onSubmit={handleAdd} className="flex flex-col gap-3">
                             <input type="text" placeholder="Nome Completo *" className="w-full p-3 bg-gray-50 border rounded-lg" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                             <select className="w-full p-3 bg-gray-50 border rounded-lg" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
@@ -361,60 +370,57 @@
                             <div key={v.id}>
                                 {(i > 0 && v.groupId !== visitors[i-1].groupId) && <div className="h-4 border-t-2 border-dashed border-gray-200 my-2 relative"><span className="absolute top-[-10px] left-1/2 -translate-x-1/2 bg-gray-100 px-2 text-xs text-gray-400">Novo Grupo</span></div>}
                                 <div className={`p-3 rounded-lg border border-gray-100 flex justify-between items-center ${v.groupId % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}>
-                                    <div><p className="font-bold text-gray-800">{v.name}</p><p className="text-xs text-gray-500">{v.church || 'Sem igreja'} • {v.city || 'Local'}</p></div>
+                                    <div><p className="font-bold text-gray-800">{v.name}</p><p className="text-xs text-gray-500">{v.church} • {v.city}</p></div>
                                     <button onClick={() => setVisitors(visitors.filter(x => x.id !== v.id))} className="text-red-400 p-2"><Icons.Trash /></button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg">
-                        <div className="max-w-md mx-auto">
-                            <button onClick={sendList} disabled={status === 'sending' || visitors.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">
-                                {status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR VISITANTES
-                            </button>
-                        </div>
-                    </div>
+                    <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg"><div className="max-w-md mx-auto"><button onClick={sendList} disabled={status === 'sending' || visitors.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">{status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR LISTA ({shift.toUpperCase()})</button></div></div>
                 </div>
             );
         }
 
         // ==========================================
-        // TELA: NOVOS CONVERTIDOS
+        // NOVOS CONVERTIDOS
         // ==========================================
         function NewConvert({ user }) {
             const [converts, setConverts] = useState([]);
             const [form, setForm] = useState({ name: '', phone: '', address: '' });
             const [status, setStatus] = useState('');
+            const [shift, setShift] = useState('noite');
 
-            const handleAdd = (e) => {
-                e.preventDefault();
-                if (!form.name.trim()) return;
-                setConverts([...converts, { id: Date.now(), ...form }]);
-                setForm({ name: '', phone: '', address: '' });
-            };
+            const handleAdd = (e) => { e.preventDefault(); if (!form.name.trim()) return; setConverts([...converts, { id: Date.now(), ...form }]); setForm({ name: '', phone: '', address: '' }); };
 
             const sendList = async () => {
                 if (!user || !db || converts.length === 0) return;
                 setStatus('sending');
+                const today = new Date().toISOString().split('T')[0];
+                const docId = `${today}_${shift}`;
+
                 try {
-                    await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('convert_lists').doc('live_list').set({
-                        converts: converts, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), senderId: user.uid
-                    });
-                    setStatus('success');
-                    setTimeout(() => setStatus(''), 3000);
-                } catch (error) { 
-                    console.error("Erro no envio:", error);
-                    setStatus('error'); 
-                    alert("Erro ao enviar: " + error.message + "\n\nVerifique se as Regras do Firestore estão em 'Modo Teste' ou permitem gravação."); 
-                }
+                    const docRef = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('daily_lists').doc(docId);
+                    await docRef.set({
+                        date: today,
+                        shift: shift,
+                        converts: firebase.firestore.FieldValue.arrayUnion(...converts),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    setStatus('success'); setTimeout(() => {
+                        setStatus('');
+                        setConverts([]);
+                    }, 2000);
+                } catch (error) { setStatus('error'); alert("Erro ao enviar: " + error.message); }
             };
 
-            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
+            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado e Juntado!</h2></div>;
 
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-purple-100 mb-4">
                         <h2 className="font-bold text-purple-700 mb-4 flex items-center gap-2"><div className="text-purple-600"><Icons.Heart /></div> Novo Convertido</h2>
+                        <ShiftSelector shift={shift} setShift={setShift} />
                         <form onSubmit={handleAdd} className="flex flex-col gap-3">
                             <input type="text" placeholder="Nome Completo *" className="w-full p-3 bg-gray-50 border rounded-lg" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                             <input type="tel" placeholder="Telefone / WhatsApp *" className="w-full p-3 bg-gray-50 border rounded-lg" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
@@ -430,22 +436,17 @@
                             </div>
                         ))}
                     </div>
-                    <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg">
-                        <div className="max-w-md mx-auto">
-                            <button onClick={sendList} disabled={status === 'sending' || converts.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">
-                                {status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR CONVERTIDOS
-                            </button>
-                        </div>
-                    </div>
+                    <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg"><div className="max-w-md mx-auto"><button onClick={sendList} disabled={status === 'sending' || converts.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">{status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR ({shift.toUpperCase()})</button></div></div>
                 </div>
             );
         }
 
         // ==========================================
-        // TELA DO DIRIGENTE
+        // DIRIGENTE
         // ==========================================
         function Leader({ user }) {
-            const [activeTab, setActiveTab] = useState('visitors'); // 'visitors' | 'converts'
+            const [activeTab, setActiveTab] = useState('visitors');
+            const [shift, setShift] = useState('noite');
             const [visitorsList, setVisitorsList] = useState([]);
             const [convertsList, setConvertsList] = useState([]);
             const [loading, setLoading] = useState(false);
@@ -454,55 +455,59 @@
             const fetchAll = async () => {
                 if (!user || !db) return;
                 setLoading(true);
-                try {
-                    // Buscar Visitantes
-                    const vDoc = await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('visitor_lists').doc('live_list').get();
-                    if (vDoc.exists) setVisitorsList(vDoc.data().visitors || []);
-                    
-                    // Buscar Convertidos
-                    const cDoc = await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('convert_lists').doc('live_list').get();
-                    if (cDoc.exists) setConvertsList(cDoc.data().converts || []);
+                const today = new Date().toISOString().split('T')[0];
+                const docId = `${today}_${shift}`;
 
+                try {
+                    const doc = await db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('daily_lists').doc(docId).get();
+                    
+                    if (doc.exists) {
+                        const data = doc.data();
+                        setVisitorsList(data.visitors || []);
+                        setConvertsList(data.converts || []);
+                    } else {
+                        setVisitorsList([]);
+                        setConvertsList([]);
+                    }
                     setLastUpdate(new Date());
                 } catch (error) { console.error(error); alert("Erro ao atualizar: " + error.message); } 
                 finally { setLoading(false); }
             };
+
+            // Recarregar quando trocar o turno
+            useEffect(() => {
+                fetchAll();
+            }, [shift]);
 
             const groupedVisitors = visitorsList.reduce((g, i) => { const gr = g[i.groupId] || []; gr.push(i); g[i.groupId] = gr; return g; }, {});
 
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center mb-4">
+                        <h2 className="text-sm text-gray-500 mb-2 font-bold">Visualizando Culto de Hoje:</h2>
+                        <ShiftSelector shift={shift} setShift={setShift} />
+                        
                         <button onClick={fetchAll} disabled={loading} className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg shadow flex justify-center items-center gap-3 active:bg-blue-800">
                             {loading ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Download />} {loading ? 'Atualizando...' : 'ATUALIZAR LISTAS'}
                         </button>
                         {lastUpdate && <p className="text-xs text-gray-400 mt-2">Atualizado às: {lastUpdate.toLocaleTimeString()}</p>}
                     </div>
 
-                    {/* ABAS */}
                     <div className="flex mb-4 bg-gray-200 rounded-lg p-1">
-                        <button onClick={() => setActiveTab('visitors')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'visitors' ? 'bg-white text-blue-700 shadow' : 'text-gray-500'}`}>
-                            Visitantes ({visitorsList.length})
-                        </button>
-                        <button onClick={() => setActiveTab('converts')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'converts' ? 'bg-white text-purple-700 shadow' : 'text-gray-500'}`}>
-                            Convertidos ({convertsList.length})
-                        </button>
+                        <button onClick={() => setActiveTab('visitors')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'visitors' ? 'bg-white text-blue-700 shadow' : 'text-gray-500'}`}>Visitantes ({visitorsList.length})</button>
+                        <button onClick={() => setActiveTab('converts')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'converts' ? 'bg-white text-purple-700 shadow' : 'text-gray-500'}`}>Convertidos ({convertsList.length})</button>
                     </div>
 
-                    {/* CONTEÚDO VISITANTES */}
                     {activeTab === 'visitors' && (
                         <div className="space-y-4 tab-content">
-                            {Object.keys(groupedVisitors).length === 0 && <p className="text-center text-gray-400 py-8">Nenhum visitante.</p>}
+                            {Object.keys(groupedVisitors).length === 0 && <p className="text-center text-gray-400 py-8">Nenhum visitante neste turno.</p>}
                             {Object.keys(groupedVisitors).map(gId => (
                                 <div key={gId} className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-blue-500">
                                     <div className="bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 flex justify-between"><span>Grupo / Família</span><span>{groupedVisitors[gId].length} pessoa(s)</span></div>
                                     <div className="divide-y divide-gray-100">
                                         {groupedVisitors[gId].map((v, i) => (
                                             <div key={i} className="p-4">
-                                                <div className="flex items-start justify-between">
-                                                    <p className="text-lg font-bold text-gray-800">{v.name}</p>
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 whitespace-nowrap ${v.type === 'evangelical' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>{v.type === 'evangelical' ? 'Evangélico' : 'Não Evangélico'}</span>
-                                                </div>
+                                                <div className="flex items-start justify-between"><p className="text-lg font-bold text-gray-800">{v.name}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 whitespace-nowrap ${v.type === 'evangelical' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>{v.type === 'evangelical' ? 'Evangélico' : 'Não Evangélico'}</span></div>
                                                 {v.relationship && <p className="text-sm font-medium text-purple-600 italic">↳ {v.relationship}</p>}
                                                 <div className="flex gap-2 text-sm text-gray-600 mt-1"><span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{v.church || 'Sem igreja'}</span><span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{v.city || 'Local'}</span></div>
                                             </div>
@@ -512,11 +517,9 @@
                             ))}
                         </div>
                     )}
-
-                    {/* CONTEÚDO CONVERTIDOS */}
                     {activeTab === 'converts' && (
                         <div className="space-y-4 tab-content">
-                             {convertsList.length === 0 && <p className="text-center text-gray-400 py-8">Nenhum novo convertido.</p>}
+                             {convertsList.length === 0 && <p className="text-center text-gray-400 py-8">Nenhum novo convertido neste turno.</p>}
                              {convertsList.map((c, i) => (
                                 <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-l-4 border-purple-500 flex flex-col gap-2">
                                     <div className="flex items-center gap-2"><div className="text-purple-600"><Icons.Heart /></div><p className="text-lg font-bold text-gray-800">{c.name}</p></div>
