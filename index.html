@@ -15,9 +15,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Ícones Lucide -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -61,33 +58,29 @@
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v2';
+        const APP_VERSION = "v2.0";
 
         const { useState, useEffect } = React;
 
         // ==========================================
-        // COMPONENTES DE ÍCONES (Lucide)
+        // ÍCONES SVG NATIVOS (Zero erro de renderização)
         // ==========================================
-        // Função auxiliar para garantir que os ícones renderizem
-        const renderIcons = () => setTimeout(() => {
-            if(window.lucide) window.lucide.createIcons();
-        }, 50);
-
         const Icons = {
-            Users: () => <i data-lucide="users" className="w-6 h-6"></i>,
-            User: () => <i data-lucide="user" className="w-5 h-5"></i>,
-            Send: () => <i data-lucide="send" className="w-5 h-5"></i>,
-            Download: () => <i data-lucide="download" className="w-5 h-5"></i>,
-            Plus: () => <i data-lucide="plus" className="w-5 h-5"></i>,
-            Trash: () => <i data-lucide="trash-2" className="w-4 h-4"></i>,
-            Refresh: () => <i data-lucide="rotate-cw" className="w-5 h-5"></i>,
-            Check: () => <i data-lucide="check-circle" className="w-12 h-12 text-green-500"></i>,
-            Lock: () => <i data-lucide="lock" className="w-5 h-5"></i>,
-            LogOut: () => <i data-lucide="log-out" className="w-4 h-4"></i>,
-            Eye: () => <i data-lucide="eye" className="w-5 h-5 text-gray-500"></i>,
-            EyeOff: () => <i data-lucide="eye-off" className="w-5 h-5 text-gray-500"></i>,
-            Heart: () => <i data-lucide="heart" className="w-5 h-5"></i>,
-            Phone: () => <i data-lucide="phone" className="w-4 h-4"></i>,
-            MapPin: () => <i data-lucide="map-pin" className="w-4 h-4"></i>
+            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+            Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>,
+            Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Eye: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+            EyeOff: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+            Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+            Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         };
 
         // ==========================================
@@ -108,15 +101,12 @@
                             setView('login');
                         }
                         setLoading(false);
-                        renderIcons();
                     });
                     return () => unsubscribe();
                 } else {
                     setLoading(false);
                 }
             }, []);
-
-            useEffect(() => { renderIcons(); }, [view]);
 
             const handleLogout = () => { if(auth) auth.signOut(); };
 
@@ -150,30 +140,60 @@
                             </>
                         )}
                     </main>
+
+                    {/* Versão no Rodapé */}
+                    <div className="text-center py-4 text-xs text-gray-400">
+                        Versão: {APP_VERSION}
+                    </div>
                 </div>
             );
         }
 
         // ==========================================
-        // TELA DE LOGIN
+        // TELA DE LOGIN / CADASTRO
         // ==========================================
         function LoginScreen() {
+            const [isRegistering, setIsRegistering] = useState(false); // Alterna entre Login e Cadastro
             const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('ADSolanea460'); 
+            const [password, setPassword] = useState(''); 
             const [showPassword, setShowPassword] = useState(false);
             const [error, setError] = useState('');
-            const [loggingIn, setLoggingIn] = useState(false);
+            const [successMsg, setSuccessMsg] = useState('');
+            const [loading, setLoading] = useState(false);
 
-            // Forçar renderização dos ícones ao alternar a senha
-            useEffect(() => { renderIcons(); }, [showPassword]);
-
-            const handleLogin = async (e) => {
+            const handleSubmit = async (e) => {
                 e.preventDefault();
                 setError('');
-                setLoggingIn(true);
-                if (!auth) { setError('Firebase não configurado.'); setLoggingIn(false); return; }
-                try { await auth.signInWithEmailAndPassword(email, password); } 
-                catch (err) { console.error(err); setError('E-mail ou senha inválidos.'); setLoggingIn(false); }
+                setSuccessMsg('');
+                setLoading(true);
+
+                if (!auth) { 
+                    setError('Firebase não configurado.'); 
+                    setLoading(false); 
+                    return; 
+                }
+
+                try {
+                    if (isRegistering) {
+                        // Cadastro
+                        await auth.createUserWithEmailAndPassword(email, password);
+                        setSuccessMsg('Conta criada com sucesso! Entrando...');
+                        // O onAuthStateChanged vai redirecionar automaticamente
+                    } else {
+                        // Login
+                        await auth.signInWithEmailAndPassword(email, password);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    let msg = 'Erro ao processar.';
+                    if (err.code === 'auth/wrong-password') msg = 'Senha incorreta.';
+                    if (err.code === 'auth/user-not-found') msg = 'Usuário não encontrado.';
+                    if (err.code === 'auth/email-already-in-use') msg = 'E-mail já está em uso.';
+                    if (err.code === 'auth/weak-password') msg = 'A senha deve ter pelo menos 6 caracteres.';
+                    if (err.code === 'auth/invalid-email') msg = 'E-mail inválido.';
+                    setError(msg);
+                    setLoading(false);
+                }
             };
 
             return (
@@ -182,26 +202,66 @@
                         <div className="flex justify-center mb-6 text-blue-600">
                             <div className="bg-blue-100 p-4 rounded-full"><Icons.Lock /></div>
                         </div>
-                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Acesso Restrito</h2>
-                        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+                            {isRegistering ? 'Criar Conta' : 'Acesso Restrito'}
+                        </h2>
+                        <p className="text-center text-gray-400 text-sm mb-6">
+                            {isRegistering ? 'Preencha os dados para se registrar' : 'Entre com seu e-mail e senha'}
+                        </p>
+                        
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-600 ml-1">E-mail</label>
-                                <input type="email" required placeholder="ex: obreiro@ad.com" className="w-full p-3 bg-gray-50 border rounded-lg mt-1" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                <input 
+                                    type="email" 
+                                    required 
+                                    placeholder="seu@email.com" 
+                                    className="w-full p-3 bg-gray-50 border rounded-lg mt-1 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                    value={email} 
+                                    onChange={(e) => setEmail(e.target.value)} 
+                                />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-600 ml-1">Senha</label>
                                 <div className="relative mt-1">
-                                    <input type={showPassword ? "text" : "password"} required className="w-full p-3 bg-gray-50 border rounded-lg pr-12" value={password} onChange={(e) => setPassword(e.target.value)} />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 hover:bg-gray-200 rounded-full z-10 flex items-center justify-center h-10 w-10">
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        required 
+                                        placeholder="Sua senha" 
+                                        className="w-full p-3 bg-gray-50 border rounded-lg pr-12 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                        value={password} 
+                                        onChange={(e) => setPassword(e.target.value)} 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowPassword(!showPassword)} 
+                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600 rounded-full z-10 flex items-center justify-center h-10 w-10"
+                                    >
                                         {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
                                     </button>
                                 </div>
                             </div>
-                            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
-                            <button type="submit" disabled={loggingIn} className="mt-2 w-full bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md active:bg-blue-800 disabled:opacity-50">
-                                {loggingIn ? 'Entrando...' : 'Entrar no Sistema'}
+                            
+                            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-100">{error}</p>}
+                            {successMsg && <p className="text-green-600 text-sm text-center bg-green-50 p-2 rounded border border-green-100">{successMsg}</p>}
+                            
+                            <button 
+                                type="submit" 
+                                disabled={loading} 
+                                className={`mt-2 w-full text-white font-bold py-3 rounded-lg shadow-md disabled:opacity-50 transition-colors ${isRegistering ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800' : 'bg-blue-700 hover:bg-blue-800 active:bg-blue-900'}`}
+                            >
+                                {loading ? 'Processando...' : (isRegistering ? 'CADASTRAR' : 'ENTRAR')}
                             </button>
                         </form>
+
+                        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+                            <button 
+                                onClick={() => { setIsRegistering(!isRegistering); setError(''); setSuccessMsg(''); }}
+                                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                                {isRegistering ? 'Já tem conta? Entre aqui' : 'Não tem conta? Cadastre-se'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
@@ -213,7 +273,7 @@
         function Menu({ setView }) {
             return (
                 <div className="flex flex-col gap-4 mt-6">
-                    <button onClick={() => setView('reception')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-blue-500 active:bg-gray-50">
+                    <button onClick={() => setView('reception')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-blue-500 active:bg-gray-50 transition-transform active:scale-95">
                         <div className="bg-blue-100 p-3 rounded-full text-blue-700"><Icons.User /></div>
                         <div className="text-left">
                             <span className="block text-lg font-bold text-gray-800">Recepção (Visitantes)</span>
@@ -221,7 +281,7 @@
                         </div>
                     </button>
 
-                    <button onClick={() => setView('new_convert')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-purple-500 active:bg-gray-50">
+                    <button onClick={() => setView('new_convert')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-purple-500 active:bg-gray-50 transition-transform active:scale-95">
                         <div className="bg-purple-100 p-3 rounded-full text-purple-700"><Icons.Heart /></div>
                         <div className="text-left">
                             <span className="block text-lg font-bold text-gray-800">Novos Convertidos</span>
@@ -229,7 +289,7 @@
                         </div>
                     </button>
 
-                    <button onClick={() => setView('leader')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-green-500 active:bg-gray-50">
+                    <button onClick={() => setView('leader')} className="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 border-l-4 border-green-500 active:bg-gray-50 transition-transform active:scale-95">
                         <div className="bg-green-100 p-3 rounded-full text-green-700"><Icons.Download /></div>
                         <div className="text-left">
                             <span className="block text-lg font-bold text-gray-800">Área do Dirigente</span>
@@ -248,8 +308,6 @@
             const [currentGroup, setCurrentGroup] = useState(1);
             const [formData, setFormData] = useState({ name: '', church: '', city: '', type: 'evangelical', relationship: '' });
             const [status, setStatus] = useState('');
-
-            useEffect(() => { renderIcons(); }, [visitors, status]);
 
             const handleAdd = (e) => {
                 e.preventDefault();
@@ -270,7 +328,7 @@
                 } catch (error) { setStatus('error'); alert("Erro ao enviar."); }
             };
 
-            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
+            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
 
             return (
                 <div className="pb-20">
@@ -288,8 +346,8 @@
                                 <input type="text" placeholder="Cidade" className="w-1/2 p-3 bg-gray-50 border rounded-lg" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
                             </div>
                             <div className="flex gap-2 mt-2">
-                                <button type="button" onClick={() => setCurrentGroup(p => p+1)} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg text-sm flex justify-center items-center gap-2"><Icons.Plus /> Novo Grupo</button>
-                                <button type="submit" className="flex-[2] bg-blue-600 text-white py-3 rounded-lg font-bold">Adicionar</button>
+                                <button type="button" onClick={() => setCurrentGroup(p => p+1)} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg text-sm flex justify-center items-center gap-2 active:bg-gray-300"><Icons.Plus /> Novo Grupo</button>
+                                <button type="submit" className="flex-[2] bg-blue-600 text-white py-3 rounded-lg font-bold active:bg-blue-700">Adicionar</button>
                             </div>
                         </form>
                     </div>
@@ -306,8 +364,8 @@
                     </div>
                     <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg">
                         <div className="max-w-md mx-auto">
-                            <button onClick={sendList} disabled={status === 'sending' || visitors.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50">
-                                {status === 'sending' ? <Icons.Refresh /> : <Icons.Send />} ENVIAR VISITANTES
+                            <button onClick={sendList} disabled={status === 'sending' || visitors.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">
+                                {status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR VISITANTES
                             </button>
                         </div>
                     </div>
@@ -322,8 +380,6 @@
             const [converts, setConverts] = useState([]);
             const [form, setForm] = useState({ name: '', phone: '', address: '' });
             const [status, setStatus] = useState('');
-
-            useEffect(() => { renderIcons(); }, [converts, status]);
 
             const handleAdd = (e) => {
                 e.preventDefault();
@@ -344,17 +400,17 @@
                 } catch (error) { setStatus('error'); alert("Erro ao enviar."); }
             };
 
-            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
+            if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
 
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-purple-100 mb-4">
-                        <h2 className="font-bold text-purple-700 mb-4 flex items-center gap-2"><Icons.Heart /> Novo Convertido</h2>
+                        <h2 className="font-bold text-purple-700 mb-4 flex items-center gap-2"><div className="text-purple-600"><Icons.Heart /></div> Novo Convertido</h2>
                         <form onSubmit={handleAdd} className="flex flex-col gap-3">
                             <input type="text" placeholder="Nome Completo *" className="w-full p-3 bg-gray-50 border rounded-lg" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                             <input type="tel" placeholder="Telefone / WhatsApp *" className="w-full p-3 bg-gray-50 border rounded-lg" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
                             <input type="text" placeholder="Endereço (Opcional)" className="w-full p-3 bg-gray-50 border rounded-lg" value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
-                            <button type="submit" className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold mt-2 shadow-sm">Adicionar à Lista</button>
+                            <button type="submit" className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold mt-2 shadow-sm active:bg-purple-700">Adicionar à Lista</button>
                         </form>
                     </div>
                     <div className="space-y-2">
@@ -367,8 +423,8 @@
                     </div>
                     <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg">
                         <div className="max-w-md mx-auto">
-                            <button onClick={sendList} disabled={status === 'sending' || converts.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50">
-                                {status === 'sending' ? <Icons.Refresh /> : <Icons.Send />} ENVIAR CONVERTIDOS
+                            <button onClick={sendList} disabled={status === 'sending' || converts.length === 0} className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 active:bg-green-700">
+                                {status === 'sending' ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Send />} ENVIAR CONVERTIDOS
                             </button>
                         </div>
                     </div>
@@ -400,18 +456,16 @@
 
                     setLastUpdate(new Date());
                 } catch (error) { console.error(error); alert("Erro ao atualizar."); } 
-                finally { setLoading(false); renderIcons(); }
+                finally { setLoading(false); }
             };
-
-            useEffect(() => { renderIcons(); }, [activeTab, visitorsList, convertsList]);
 
             const groupedVisitors = visitorsList.reduce((g, i) => { const gr = g[i.groupId] || []; gr.push(i); g[i.groupId] = gr; return g; }, {});
 
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center mb-4">
-                        <button onClick={fetchAll} disabled={loading} className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg shadow flex justify-center items-center gap-3">
-                            {loading ? <Icons.Refresh /> : <Icons.Download />} {loading ? 'Atualizando...' : 'ATUALIZAR LISTAS'}
+                        <button onClick={fetchAll} disabled={loading} className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg shadow flex justify-center items-center gap-3 active:bg-blue-800">
+                            {loading ? <div className="animate-spin"><Icons.Refresh /></div> : <Icons.Download />} {loading ? 'Atualizando...' : 'ATUALIZAR LISTAS'}
                         </button>
                         {lastUpdate && <p className="text-xs text-gray-400 mt-2">Atualizado às: {lastUpdate.toLocaleTimeString()}</p>}
                     </div>
@@ -456,7 +510,7 @@
                              {convertsList.length === 0 && <p className="text-center text-gray-400 py-8">Nenhum novo convertido.</p>}
                              {convertsList.map((c, i) => (
                                 <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-l-4 border-purple-500 flex flex-col gap-2">
-                                    <div className="flex items-center gap-2"><Icons.Heart /><p className="text-lg font-bold text-gray-800">{c.name}</p></div>
+                                    <div className="flex items-center gap-2"><div className="text-purple-600"><Icons.Heart /></div><p className="text-lg font-bold text-gray-800">{c.name}</p></div>
                                     <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded"><Icons.Phone /><span className="font-mono">{c.phone}</span></div>
                                     {c.address && <div className="flex items-start gap-2 text-gray-500 text-sm px-2"><Icons.MapPin /><span>{c.address}</span></div>}
                                 </div>
