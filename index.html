@@ -15,7 +15,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -55,8 +55,8 @@
         
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
-        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v3'; // Atualizado para v3
-        const APP_VERSION = "v3.0 (Turnos)";
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v3'; 
+        const APP_VERSION = "v3.1 (Correção Grupos)";
 
         const { useState, useEffect } = React;
 
@@ -294,11 +294,15 @@
         }
 
         // ==========================================
-        // RECEPÇÃO
+        // RECEPÇÃO (COM ID DE GRUPO ÚNICO)
         // ==========================================
         function Reception({ user }) {
             const [visitors, setVisitors] = useState([]);
-            const [currentGroup, setCurrentGroup] = useState(1);
+            // GERA ID ÚNICO NA ENTRADA E AO MUDAR GRUPO
+            const generateGroupId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            const [currentGroupId, setCurrentGroupId] = useState(generateGroupId());
+            const [displayGroupCount, setDisplayGroupCount] = useState(1); // Apenas visual
+
             const [formData, setFormData] = useState({ name: '', church: '', city: '', type: 'evangelical', relationship: '' });
             const [status, setStatus] = useState('');
             const [shift, setShift] = useState('noite');
@@ -306,20 +310,29 @@
             const handleAdd = (e) => {
                 e.preventDefault();
                 if (!formData.name.trim()) return;
-                setVisitors([...visitors, { id: Date.now(), ...formData, groupId: currentGroup }]);
+                // Adiciona o groupId ÚNICO ao visitante
+                setVisitors([...visitors, { 
+                    id: `${Date.now()}-${Math.random()}`, // ID único também para o visitante
+                    ...formData, 
+                    groupId: currentGroupId 
+                }]);
                 setFormData({ name: '', church: '', city: '', type: 'evangelical', relationship: '' }); 
+            };
+
+            const startNewGroup = () => {
+                setCurrentGroupId(generateGroupId());
+                setDisplayGroupCount(prev => prev + 1);
             };
 
             const sendList = async () => {
                 if (!user || !db || visitors.length === 0) return;
                 setStatus('sending');
                 const today = new Date().toISOString().split('T')[0];
-                const docId = `${today}_${shift}`; // Separar por Data e Turno
+                const docId = `${today}_${shift}`;
 
                 try {
                     const docRef = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('daily_lists').doc(docId);
                     
-                    // Usar arrayUnion para JUNTAR dados se o documento já existir
                     await docRef.set({
                         date: today,
                         shift: shift,
@@ -330,8 +343,9 @@
                     setStatus('success');
                     setTimeout(() => {
                         setStatus('');
-                        setVisitors([]); // Limpa a lista local após enviar com sucesso
-                        setCurrentGroup(1);
+                        setVisitors([]);
+                        setCurrentGroupId(generateGroupId());
+                        setDisplayGroupCount(1);
                     }, 2000);
                 } catch (error) { 
                     setStatus('error'); 
@@ -344,7 +358,7 @@
             return (
                 <div className="pb-20">
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4">
-                        <div className="flex justify-between items-center mb-4"><h2 className="font-bold text-gray-700">Visitantes</h2><span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Grupo #{currentGroup}</span></div>
+                        <div className="flex justify-between items-center mb-4"><h2 className="font-bold text-gray-700">Visitantes</h2><span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Grupo Visual #{displayGroupCount}</span></div>
                         
                         <ShiftSelector shift={shift} setShift={setShift} />
 
@@ -360,7 +374,7 @@
                                 <input type="text" placeholder="Cidade" className="w-1/2 p-3 bg-gray-50 border rounded-lg" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
                             </div>
                             <div className="flex gap-2 mt-2">
-                                <button type="button" onClick={() => setCurrentGroup(p => p+1)} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg text-sm flex justify-center items-center gap-2 active:bg-gray-300"><Icons.Plus /> Novo Grupo</button>
+                                <button type="button" onClick={startNewGroup} className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg text-sm flex justify-center items-center gap-2 active:bg-gray-300"><Icons.Plus /> Novo Grupo</button>
                                 <button type="submit" className="flex-[2] bg-blue-600 text-white py-3 rounded-lg font-bold active:bg-blue-700">Adicionar</button>
                             </div>
                         </form>
@@ -368,8 +382,9 @@
                     <div className="space-y-2">
                         {visitors.map((v, i) => (
                             <div key={v.id}>
+                                {/* Verifica ID único de grupo para separar visualmente */}
                                 {(i > 0 && v.groupId !== visitors[i-1].groupId) && <div className="h-4 border-t-2 border-dashed border-gray-200 my-2 relative"><span className="absolute top-[-10px] left-1/2 -translate-x-1/2 bg-gray-100 px-2 text-xs text-gray-400">Novo Grupo</span></div>}
-                                <div className={`p-3 rounded-lg border border-gray-100 flex justify-between items-center ${v.groupId % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}>
+                                <div className={`p-3 rounded-lg border border-gray-100 flex justify-between items-center bg-white`}>
                                     <div><p className="font-bold text-gray-800">{v.name}</p><p className="text-xs text-gray-500">{v.church} • {v.city}</p></div>
                                     <button onClick={() => setVisitors(visitors.filter(x => x.id !== v.id))} className="text-red-400 p-2"><Icons.Trash /></button>
                                 </div>
@@ -390,7 +405,7 @@
             const [status, setStatus] = useState('');
             const [shift, setShift] = useState('noite');
 
-            const handleAdd = (e) => { e.preventDefault(); if (!form.name.trim()) return; setConverts([...converts, { id: Date.now(), ...form }]); setForm({ name: '', phone: '', address: '' }); };
+            const handleAdd = (e) => { e.preventDefault(); if (!form.name.trim()) return; setConverts([...converts, { id: `${Date.now()}-${Math.random()}`, ...form }]); setForm({ name: '', phone: '', address: '' }); };
 
             const sendList = async () => {
                 if (!user || !db || converts.length === 0) return;
@@ -442,7 +457,7 @@
         }
 
         // ==========================================
-        // DIRIGENTE
+        // DIRIGENTE (AGORA ORDENA CORRETAMENTE)
         // ==========================================
         function Leader({ user }) {
             const [activeTab, setActiveTab] = useState('visitors');
@@ -479,7 +494,15 @@
                 fetchAll();
             }, [shift]);
 
+            // Agrupa por ID ÚNICO de grupo e mantém ordem de chegada (pelo ID do visitante que contém timestamp)
             const groupedVisitors = visitorsList.reduce((g, i) => { const gr = g[i.groupId] || []; gr.push(i); g[i.groupId] = gr; return g; }, {});
+            
+            // Ordena os grupos pela "chegada" (menor ID = mais antigo) do primeiro membro
+            const sortedGroupIds = Object.keys(groupedVisitors).sort((a, b) => {
+                const firstA = groupedVisitors[a][0].id;
+                const firstB = groupedVisitors[b][0].id;
+                return firstA > firstB ? 1 : -1;
+            });
 
             return (
                 <div className="pb-20">
@@ -500,8 +523,8 @@
 
                     {activeTab === 'visitors' && (
                         <div className="space-y-4 tab-content">
-                            {Object.keys(groupedVisitors).length === 0 && <p className="text-center text-gray-400 py-8">Nenhum visitante neste turno.</p>}
-                            {Object.keys(groupedVisitors).map(gId => (
+                            {visitorsList.length === 0 && <p className="text-center text-gray-400 py-8">Nenhum visitante neste turno.</p>}
+                            {sortedGroupIds.map(gId => (
                                 <div key={gId} className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-blue-500">
                                     <div className="bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 flex justify-between"><span>Grupo / Família</span><span>{groupedVisitors[gId].length} pessoa(s)</span></div>
                                     <div className="divide-y divide-gray-100">
