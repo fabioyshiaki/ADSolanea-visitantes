@@ -56,7 +56,7 @@
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v3'; 
-        const APP_VERSION = "v3.2 (Limpeza Auto)";
+        const APP_VERSION = "v3.3";
 
         const { useState, useEffect } = React;
 
@@ -155,7 +155,7 @@
         function LoginScreen({ setView }) {
             const [isRegistering, setIsRegistering] = useState(false); 
             const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('ADSolanea460'); 
+            const [password, setPassword] = useState(''); // Senha vazia conforme solicitado
             const [showPassword, setShowPassword] = useState(false);
             const [error, setError] = useState('');
             const [successMsg, setSuccessMsg] = useState('');
