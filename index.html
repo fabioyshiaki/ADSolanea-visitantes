@@ -61,7 +61,7 @@
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
         
-        // ID do App para separar dados no Firestore (conforme regras do sistema)
+        // ID do App para separar dados no Firestore
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v1';
 
         const { useState, useEffect } = React;
@@ -77,33 +77,29 @@
             Plus: () => <i data-lucide="plus" className="w-5 h-5"></i>,
             Trash: () => <i data-lucide="trash-2" className="w-4 h-4"></i>,
             Refresh: () => <i data-lucide="rotate-cw" className="w-5 h-5"></i>,
-            Check: () => <i data-lucide="check-circle" className="w-12 h-12 text-green-500"></i>
+            Check: () => <i data-lucide="check-circle" className="w-12 h-12 text-green-500"></i>,
+            Lock: () => <i data-lucide="lock" className="w-5 h-5"></i>,
+            LogOut: () => <i data-lucide="log-out" className="w-4 h-4"></i>
         };
 
         // ==========================================
         // COMPONENTE PRINCIPAL
         // ==========================================
         function App() {
-            const [view, setView] = useState('menu'); // menu, reception, leader
+            const [view, setView] = useState('login'); // login, menu, reception, leader
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
 
-            // Autenticação Anônima ao iniciar
+            // Monitorar estado de autenticação
             useEffect(() => {
                 if (auth) {
-                    // Tenta usar token customizado do ambiente ou login anônimo
-                    const initAuth = async () => {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await auth.signInWithCustomToken(__initial_auth_token);
-                        } else {
-                            await auth.signInAnonymously();
-                        }
-                    };
-                    
-                    initAuth();
-
                     const unsubscribe = auth.onAuthStateChanged((u) => {
                         setUser(u);
+                        if (u) {
+                            if (view === 'login') setView('menu');
+                        } else {
+                            setView('login');
+                        }
                         setLoading(false);
                     });
                     return () => unsubscribe();
@@ -111,7 +107,6 @@
                     setLoading(false);
                 }
                 
-                // Inicializar ícones
                 setTimeout(() => lucide.createIcons(), 100);
             }, []);
 
@@ -120,32 +115,131 @@
                 lucide.createIcons();
             }, [view]);
 
+            const handleLogout = () => {
+                if(auth) auth.signOut();
+            };
+
             if (loading) return <div className="flex h-screen items-center justify-center bg-gray-100">Carregando...</div>;
 
             return (
                 <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
                     {/* Header */}
-                    <header className="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-10">
-                        <div className="flex justify-between items-center max-w-md mx-auto">
-                            <h1 className="text-xl font-bold flex items-center gap-2">
-                                <Icons.Users /> Visitantes
-                            </h1>
-                            {view !== 'menu' && (
-                                <button 
-                                    onClick={() => setView('menu')}
-                                    className="text-sm bg-blue-800 px-3 py-1 rounded hover:bg-blue-600"
-                                >
-                                    Sair
-                                </button>
-                            )}
-                        </div>
-                    </header>
+                    {user && (
+                        <header className="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-10">
+                            <div className="flex justify-between items-center max-w-md mx-auto">
+                                <h1 className="text-xl font-bold flex items-center gap-2">
+                                    <Icons.Users /> Visitantes
+                                </h1>
+                                <div className="flex gap-2">
+                                    {view !== 'menu' && (
+                                        <button 
+                                            onClick={() => setView('menu')}
+                                            className="text-sm bg-blue-800 px-3 py-1 rounded hover:bg-blue-600"
+                                        >
+                                            Menu
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="text-sm bg-red-600 px-3 py-1 rounded hover:bg-red-500 flex items-center"
+                                    >
+                                        <Icons.LogOut />
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+                    )}
 
                     <main className="max-w-md mx-auto p-4">
-                        {view === 'menu' && <Menu setView={setView} />}
-                        {view === 'reception' && <Reception user={user} />}
-                        {view === 'leader' && <Leader user={user} />}
+                        {!user ? (
+                            <LoginScreen />
+                        ) : (
+                            <>
+                                {view === 'menu' && <Menu setView={setView} />}
+                                {view === 'reception' && <Reception user={user} />}
+                                {view === 'leader' && <Leader user={user} />}
+                            </>
+                        )}
                     </main>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // TELA DE LOGIN
+        // ==========================================
+        function LoginScreen() {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('ADSolanea460'); // Pré-preenchido para facilitar
+            const [error, setError] = useState('');
+            const [loggingIn, setLoggingIn] = useState(false);
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoggingIn(true);
+
+                if (!auth) {
+                    setError('Firebase não configurado.');
+                    setLoggingIn(false);
+                    return;
+                }
+
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } catch (err) {
+                    console.error(err);
+                    setError('E-mail ou senha inválidos.');
+                    setLoggingIn(false);
+                }
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+                    <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm border border-gray-100">
+                        <div className="flex justify-center mb-6 text-blue-600">
+                            <div className="bg-blue-100 p-4 rounded-full">
+                                <Icons.Lock />
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Acesso Restrito</h2>
+                        
+                        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-600 ml-1">E-mail</label>
+                                <input 
+                                    type="email" 
+                                    required
+                                    placeholder="ex: recepcao@igreja.com"
+                                    className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mt-1"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="text-sm font-medium text-gray-600 ml-1">Senha</label>
+                                <input 
+                                    type="password" 
+                                    required
+                                    placeholder="Senha de acesso"
+                                    className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mt-1"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+
+                            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
+
+                            <button 
+                                type="submit" 
+                                disabled={loggingIn}
+                                className="mt-2 w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md active:bg-blue-700 disabled:opacity-50"
+                            >
+                                {loggingIn ? 'Entrando...' : 'Entrar no Sistema'}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             );
         }
@@ -187,8 +281,9 @@
         function Reception({ user }) {
             const [visitors, setVisitors] = useState([]);
             const [currentGroup, setCurrentGroup] = useState(1);
-            const [formData, setFormData] = useState({ name: '', church: '', city: '' });
-            const [status, setStatus] = useState(''); // 'sending', 'success', 'error'
+            // Adicionado campo relationship (parentesco)
+            const [formData, setFormData] = useState({ name: '', church: '', city: '', type: 'evangelical', relationship: '' });
+            const [status, setStatus] = useState('');
 
             const handleAdd = (e) => {
                 e.preventDefault();
@@ -201,7 +296,8 @@
                 };
 
                 setVisitors([...visitors, newVisitor]);
-                setFormData({ name: '', church: '', city: '' }); // Limpa form
+                // Limpa form mas mantém cidade/igreja se for o mesmo grupo? Não, limpa tudo para evitar confusão.
+                setFormData({ name: '', church: '', city: '', type: 'evangelical', relationship: '' }); 
                 setTimeout(() => lucide.createIcons(), 50);
             };
 
@@ -225,14 +321,14 @@
 
                 setStatus('sending');
                 try {
-                    // Grava em um documento único chamado 'live_list' para simplificar o envio/recebimento
                     await db.collection('artifacts').doc(APP_ID)
                         .collection('public').doc('data')
                         .collection('visitor_lists').doc('live_list')
                         .set({
                             visitors: visitors,
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            senderId: user.uid
+                            senderId: user.uid,
+                            senderEmail: user.email // Útil para log
                         });
                     
                     setStatus('success');
@@ -269,6 +365,22 @@
                                 className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                 value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                             />
+                            
+                            <select
+                                className="w-full p-3 bg-gray-50 border rounded-lg text-gray-700"
+                                value={formData.type}
+                                onChange={e => setFormData({...formData, type: e.target.value})}
+                            >
+                                <option value="evangelical">Evangélico</option>
+                                <option value="non_evangelical">Não Evangélico</option>
+                            </select>
+
+                            <input 
+                                type="text" placeholder="Parentesco (Opcional - ex: Esposa, Filho)" 
+                                className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500"
+                                value={formData.relationship} onChange={e => setFormData({...formData, relationship: e.target.value})}
+                            />
+
                             <div className="flex gap-2">
                                 <input 
                                     type="text" placeholder="Igreja (opcional)" 
@@ -291,7 +403,7 @@
                                 </button>
                             </div>
                             <p className="text-xs text-gray-400 text-center mt-1">
-                                * Clique em "Novo Grupo" se o próximo visitante não for parente/amigo do atual.
+                                * Clique em "Novo Grupo" para separar famílias diferentes.
                             </p>
                         </form>
                     </div>
@@ -302,7 +414,6 @@
                         {visitors.length === 0 && <p className="text-gray-400 text-center py-4 italic">Nenhum visitante adicionado ainda.</p>}
                         
                         {visitors.map((v, index) => {
-                            // Lógica visual para separar grupos
                             const isNewGroup = index > 0 && v.groupId !== visitors[index-1].groupId;
                             const groupColor = v.groupId % 2 === 0 ? 'bg-white' : 'bg-blue-50';
                             
@@ -311,7 +422,13 @@
                                     {isNewGroup && <div className="h-4 border-t-2 border-dashed border-gray-200 my-2 relative"><span className="absolute top-[-10px] left-1/2 -translate-x-1/2 bg-gray-100 px-2 text-xs text-gray-400">Novo Grupo</span></div>}
                                     <div className={`p-3 rounded-lg border border-gray-100 flex justify-between items-center ${groupColor}`}>
                                         <div>
-                                            <p className="font-bold text-gray-800">{v.name}</p>
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <p className="font-bold text-gray-800">{v.name}</p>
+                                                {v.relationship && <span className="text-xs italic text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">{v.relationship}</span>}
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${v.type === 'evangelical' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                    {v.type === 'evangelical' ? 'Evangélico' : 'Não Evangélico'}
+                                                </span>
+                                            </div>
                                             <p className="text-xs text-gray-500">
                                                 {v.church ? v.church : 'Sem igreja'} • {v.city ? v.city : 'Local'}
                                             </p>
@@ -323,7 +440,6 @@
                         })}
                     </div>
 
-                    {/* Botão Flutuante de Enviar */}
                     <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-lg">
                         <div className="max-w-md mx-auto">
                             <button 
@@ -372,7 +488,6 @@
                 }
             };
 
-            // Agrupar visualmente
             const groupedList = list.reduce((groups, item) => {
                 const group = groups[item.groupId] || [];
                 group.push(item);
@@ -412,7 +527,19 @@
                                 <div className="divide-y divide-gray-100">
                                     {groupedList[groupId].map((v, i) => (
                                         <div key={i} className="p-4">
-                                            <p className="text-lg font-bold text-gray-800">{v.name}</p>
+                                            <div className="flex flex-col">
+                                                <div className="flex items-start justify-between">
+                                                    <p className="text-lg font-bold text-gray-800">{v.name}</p>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 whitespace-nowrap ${v.type === 'evangelical' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                        {v.type === 'evangelical' ? 'Evangélico' : 'Não Evangélico'}
+                                                    </span>
+                                                </div>
+                                                {v.relationship && (
+                                                    <p className="text-sm font-medium text-purple-600 italic mt-0.5">
+                                                        ↳ {v.relationship}
+                                                    </p>
+                                                )}
+                                            </div>
                                             <div className="flex gap-2 text-sm text-gray-600 mt-1">
                                                 <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{v.church || 'Sem igreja'}</span>
                                                 <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{v.city || 'Local'}</span>
