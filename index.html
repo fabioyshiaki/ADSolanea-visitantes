@@ -58,7 +58,7 @@
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v2';
-        const APP_VERSION = "v2.0";
+        const APP_VERSION = "v2.1"; // Versão atualizada
 
         const { useState, useEffect } = React;
 
@@ -155,7 +155,7 @@
         function LoginScreen() {
             const [isRegistering, setIsRegistering] = useState(false); // Alterna entre Login e Cadastro
             const [email, setEmail] = useState('');
-            const [password, setPassword] = useState(''); 
+            const [password, setPassword] = useState('ADSolanea460'); 
             const [showPassword, setShowPassword] = useState(false);
             const [error, setError] = useState('');
             const [successMsg, setSuccessMsg] = useState('');
@@ -325,7 +325,12 @@
                     });
                     setStatus('success');
                     setTimeout(() => setStatus(''), 3000);
-                } catch (error) { setStatus('error'); alert("Erro ao enviar."); }
+                } catch (error) { 
+                    console.error("Erro no envio:", error);
+                    setStatus('error'); 
+                    // MOSTRA O ERRO REAL PARA O USUÁRIO
+                    alert("Erro ao enviar: " + error.message + "\n\nVerifique se as Regras do Firestore estão em 'Modo Teste' ou permitem gravação."); 
+                }
             };
 
             if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
@@ -397,7 +402,11 @@
                     });
                     setStatus('success');
                     setTimeout(() => setStatus(''), 3000);
-                } catch (error) { setStatus('error'); alert("Erro ao enviar."); }
+                } catch (error) { 
+                    console.error("Erro no envio:", error);
+                    setStatus('error'); 
+                    alert("Erro ao enviar: " + error.message + "\n\nVerifique se as Regras do Firestore estão em 'Modo Teste' ou permitem gravação."); 
+                }
             };
 
             if (status === 'success') return <div className="flex flex-col items-center justify-center h-64 gap-4 animate-bounce"><Icons.Check /><h2 className="text-xl font-bold text-green-700">Enviado com Sucesso!</h2><button onClick={() => setStatus('')} className="bg-gray-200 px-4 py-2 rounded">Voltar</button></div>;
@@ -455,7 +464,7 @@
                     if (cDoc.exists) setConvertsList(cDoc.data().converts || []);
 
                     setLastUpdate(new Date());
-                } catch (error) { console.error(error); alert("Erro ao atualizar."); } 
+                } catch (error) { console.error(error); alert("Erro ao atualizar: " + error.message); } 
                 finally { setLoading(false); }
             };
 
