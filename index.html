@@ -79,7 +79,9 @@
             Refresh: () => <i data-lucide="rotate-cw" className="w-5 h-5"></i>,
             Check: () => <i data-lucide="check-circle" className="w-12 h-12 text-green-500"></i>,
             Lock: () => <i data-lucide="lock" className="w-5 h-5"></i>,
-            LogOut: () => <i data-lucide="log-out" className="w-4 h-4"></i>
+            LogOut: () => <i data-lucide="log-out" className="w-4 h-4"></i>,
+            Eye: () => <i data-lucide="eye" className="w-5 h-5 text-gray-500"></i>,
+            EyeOff: () => <i data-lucide="eye-off" className="w-5 h-5 text-gray-500"></i>
         };
 
         // ==========================================
@@ -171,6 +173,7 @@
         function LoginScreen() {
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('ADSolanea460'); // Pré-preenchido para facilitar
+            const [showPassword, setShowPassword] = useState(false);
             const [error, setError] = useState('');
             const [loggingIn, setLoggingIn] = useState(false);
 
@@ -219,14 +222,26 @@
                             
                             <div>
                                 <label className="text-sm font-medium text-gray-600 ml-1">Senha</label>
-                                <input 
-                                    type="password" 
-                                    required
-                                    placeholder="Senha de acesso"
-                                    className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mt-1"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <div className="relative mt-1">
+                                    <input 
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        placeholder="Senha de acesso"
+                                        className="w-full p-3 bg-gray-50 border rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-12"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            setShowPassword(!showPassword);
+                                            setTimeout(() => lucide.createIcons(), 50);
+                                        }}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                    >
+                                        {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                                    </button>
+                                </div>
                             </div>
 
                             {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
