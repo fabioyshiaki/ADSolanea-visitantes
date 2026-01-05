@@ -56,7 +56,7 @@
         const db = firebase.firestore ? firebase.firestore() : null;
         const auth = firebase.auth ? firebase.auth() : null;
         const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'igreja-app-v3'; 
-        const APP_VERSION = "v3.1 (Correção Grupos)";
+        const APP_VERSION = "v3.2 (Limpeza Auto)";
 
         const { useState, useEffect } = React;
 
@@ -79,7 +79,6 @@
             Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
             Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
             MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
-            Help: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>,
             Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
             Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
             Sunset: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="16 5 12 9 8 5"/></svg>
@@ -98,7 +97,7 @@
                     const unsubscribe = auth.onAuthStateChanged((u) => {
                         setUser(u);
                         if (u) {
-                            if (view === 'login' || view === 'help_setup') setView('menu');
+                            if (view === 'login') setView('menu');
                         } else {
                             setView('login');
                         }
@@ -134,52 +133,18 @@
 
                     <main className="max-w-md mx-auto p-4">
                         {!user ? (
-                            view === 'help_setup' ? <HelpSetup setView={setView} /> : <LoginScreen setView={setView} />
+                            <LoginScreen setView={setView} />
                         ) : (
                             <>
                                 {view === 'menu' && <Menu setView={setView} />}
                                 {view === 'reception' && <Reception user={user} />}
                                 {view === 'new_convert' && <NewConvert user={user} />}
                                 {view === 'leader' && <Leader user={user} />}
-                                {view === 'help_setup' && <HelpSetup setView={setView} loggedIn={true} />}
                             </>
                         )}
                     </main>
 
                     <div className="text-center py-4 text-xs text-gray-400">Versão: {APP_VERSION}</div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // HELP SETUP
-        // ==========================================
-        function HelpSetup({ setView, loggedIn }) {
-            return (
-                <div className="pb-20">
-                    <div className="bg-white p-6 rounded-xl shadow-lg border border-orange-200">
-                        <div className="flex items-center gap-2 mb-4 text-orange-600">
-                            <Icons.Help />
-                            <h2 className="text-xl font-bold">Corrigir Erro de Envio</h2>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-4">Se você está vendo erros ao tentar enviar, é necessário liberar o acesso no Firebase:</p>
-                        <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2 mb-6">
-                            <li>Acesse <b>console.firebase.google.com</b></li>
-                            <li>Vá em <b>Firestore Database</b> &gt; Aba <b>Regras</b></li>
-                            <li>Cole o código abaixo:</li>
-                        </ol>
-                        <div className="bg-gray-800 text-green-400 p-3 rounded text-xs font-mono mb-6 overflow-x-auto">
-                            rules_version = '2';<br/>
-                            service cloud.firestore {'{'}<br/>
-                            &nbsp;&nbsp;match /databases/{'{'}database{'}'}/documents {'{'}<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;match /{'{'}document=**{'}'} {'{'}<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if request.auth != null;<br/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;{'}'}<br/>
-                            &nbsp;&nbsp;{'}'}<br/>
-                            {'}'}
-                        </div>
-                        <button onClick={() => setView(loggedIn ? 'menu' : 'login')} className="w-full bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">Voltar</button>
-                    </div>
                 </div>
             );
         }
@@ -244,7 +209,6 @@
                         </form>
                         <div className="mt-6 pt-4 border-t border-gray-100 text-center space-y-3">
                             <button onClick={() => { setIsRegistering(!isRegistering); setError(''); }} className="text-sm text-blue-600 hover:text-blue-800 font-medium block w-full">{isRegistering ? 'Já tem conta? Entre aqui' : 'Não tem conta? Cadastre-se'}</button>
-                            <button onClick={() => setView('help_setup')} className="text-xs text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 w-full mt-2"><span className="inline-block w-3"><Icons.Help /></span> Problemas no envio?</button>
                         </div>
                     </div>
                 </div>
@@ -269,7 +233,6 @@
                         <div className="bg-green-100 p-3 rounded-full text-green-700"><Icons.Download /></div>
                         <div className="text-left"><span className="block text-lg font-bold text-gray-800">Área do Dirigente</span><span className="text-sm text-gray-500">Ver listas</span></div>
                     </button>
-                    <button onClick={() => setView('help_setup')} className="mt-4 text-sm text-gray-500 flex items-center justify-center gap-2 py-2"><span className="w-4 h-4"><Icons.Help /></span> Ajuda / Configuração</button>
                 </div>
             );
         }
@@ -467,6 +430,30 @@
             const [loading, setLoading] = useState(false);
             const [lastUpdate, setLastUpdate] = useState(null);
 
+            // Função de limpeza automática
+            useEffect(() => {
+                const cleanupOldData = async () => {
+                    const shifts = ['manha', 'tarde', 'noite'];
+                    // Remove dados de 31 a 35 dias atrás
+                    for (let i = 31; i <= 35; i++) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const dateStr = d.toISOString().split('T')[0];
+                        
+                        shifts.forEach(s => {
+                            const docId = `${dateStr}_${s}`;
+                            db.collection('artifacts').doc(APP_ID)
+                              .collection('public').doc('data')
+                              .collection('daily_lists').doc(docId).delete().catch(() => {});
+                        });
+                    }
+                };
+                
+                if (user && db) {
+                    cleanupOldData();
+                }
+            }, [user]);
+
             const fetchAll = async () => {
                 if (!user || !db) return;
                 setLoading(true);
@@ -489,15 +476,12 @@
                 finally { setLoading(false); }
             };
 
-            // Recarregar quando trocar o turno
             useEffect(() => {
                 fetchAll();
             }, [shift]);
 
-            // Agrupa por ID ÚNICO de grupo e mantém ordem de chegada (pelo ID do visitante que contém timestamp)
             const groupedVisitors = visitorsList.reduce((g, i) => { const gr = g[i.groupId] || []; gr.push(i); g[i.groupId] = gr; return g; }, {});
             
-            // Ordena os grupos pela "chegada" (menor ID = mais antigo) do primeiro membro
             const sortedGroupIds = Object.keys(groupedVisitors).sort((a, b) => {
                 const firstA = groupedVisitors[a][0].id;
                 const firstB = groupedVisitors[b][0].id;
